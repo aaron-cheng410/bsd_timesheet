@@ -19,6 +19,8 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- OpenAI Setup ---
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
+creds_dict = st.secrets["gcp_service_account"]
+
 worker_to_payable = {
     "Christian": "Christian Granados (Vendor)",
     "Oscar": "Christian Granados (Vendor)",
@@ -334,6 +336,3 @@ if "entries_preview" in st.session_state:
     else:
         st.info("No complete entries to summarize.")
 
-
-        # Optional: upload to Google Sheet
-        # upload_to_google_sheet(df)
