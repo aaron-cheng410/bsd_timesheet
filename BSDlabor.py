@@ -4,7 +4,7 @@ from openai import OpenAI
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
-from datetime import date
+from datetime import date, datetime
 
 hide_streamlit_style = """
     <style>
@@ -18,6 +18,32 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- OpenAI Setup ---
 client = OpenAI(api_key=st.secrets["openai_api_key"])
+
+worker_to_payable = {
+    "Christian": "Christian Granados (Vendor)",
+    "Oscar": "Christian Granados (Vendor)",
+    "Edgar": "Christian Granados (Vendor)",
+    "Eddy": "Christian Granados (Vendor)",
+    "Juan Carlos": "Christian Granados (Vendor)",
+    "Jose Drywall": "Christian Granados (Vendor)",
+    "Tavo": "Christian Granados (Vendor)",
+    "Juan Chocoj": "Christian Granados (Vendor)",
+    "Tony": "Christian Granados (Vendor)",
+    "Ozzy": "Jessica Ajtun",
+    "Jose": "Jessica Ajtun",
+    "Luis De Leon": "Jessica Ajtun",
+    "Mymor": "Jessica Ajtun",
+    "Leon": "Jessica Ajtun",
+    "Fernando": "Jessica Ajtun",
+    "Junior": "Jessica Ajtun",
+    "Leonidas": "Jessica Ajtun",
+    "Estvardo": "Jessica Ajtun",
+    "Nelson": "Jessica Ajtun",
+    "Erick": "Jessica Ajtun",
+    "Andres De Jesus": "Andres De Jesus",
+    "Victor": "Andres De Jesus",
+    "Enrique": "Andres De Jesus"
+}
 
 cost_code_mapping_text = """00030 - Financing Fees
 00110 - Architectural Fees
@@ -114,11 +140,24 @@ cost_code_mapping_text = """00030 - Financing Fees
 16800 - Low Voltage (Security, Internet)
 16900 - Sound and Audio"""
 
-# --- Initialize session state ---
 if "num_rows" not in st.session_state:
     st.session_state.num_rows = 1
+if "dates" not in st.session_state:
+    st.session_state.dates = [date.today()]
 
-# --- Dropdown options ---
+for i in range(len(st.session_state.dates)):
+    if isinstance(st.session_state.dates[i], str):
+        try:
+            st.session_state.dates[i] = datetime.strptime(st.session_state.dates[i], "%m/%d/%Y").date()
+        except:
+            st.session_state.dates[i] = date.today()
+
+if len(st.session_state.dates) < st.session_state.num_rows:
+    for _ in range(st.session_state.num_rows - len(st.session_state.dates)):
+        st.session_state.dates.append(date.today())
+elif len(st.session_state.dates) > st.session_state.num_rows:
+    st.session_state.dates = st.session_state.dates[:st.session_state.num_rows]
+
 hourly_rates = {
     "Christian": 43.75,
     "Andres De Jesus": 37.50,
@@ -132,7 +171,6 @@ hourly_rates = {
     "Juan Chocoj": 37.50,
     "Victor": 31.25,
     "Tony": 31.25,
-    "Enrique": 31.25,
     "Ozzy": 37.50,
     "Jose": 31.25,
     "Luis De Leon": 31.25,
@@ -144,148 +182,157 @@ hourly_rates = {
     "Estvardo": 25.00,
     "Nelson": 25.00,
     "Erick": 25.00,
-    "Byron Helper": 25.00,
 }
 
 worker_names = list(hourly_rates.keys())
 properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sanoma', 'Highland', 'Channel View', 'Paseo De las Estrellas']
-payable_parties = ["Christian Granados (Vendor)", "Jessica Ajtun", "Andres De Jesus"]
 
-# --- Add row button ---
+st.title("Timesheet Submission")
+
+if st.button("Reset Timesheet"):
+    st.session_state.clear()
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
+
+selected_worker = st.selectbox("Select Worker", [""] + worker_names, key="worker_select")
+if not selected_worker:
+    st.stop()
+
+rate = hourly_rates.get(selected_worker, 0.0)
 
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("➕ Add Entry"):
+    if st.button("➕ Add Date"):
         st.session_state.num_rows += 1
+        st.session_state.dates.append(date.today())
 with col2:
-    if st.button("🗑️ Remove Last Entry") and st.session_state.num_rows > 1:
+    if st.button("🗑️ Remove Last Date") and st.session_state.num_rows > 1:
         st.session_state.num_rows -= 1
+        st.session_state.dates.pop()
 
-# --- Timesheet Form ---
+# --- Form Input ---
 with st.form("multi_timesheet_form"):
-    st.title("Timesheet Submission")
-
     entries = []
-
     for i in range(st.session_state.num_rows):
         st.markdown(f"### Entry {i + 1}")
-
-        col1, col2, col3 = st.columns(3)
+        st.session_state.dates[i] = st.date_input("Labor Date", value=st.session_state.dates[i], key=f"date_{i}")
+        col1, col2 = st.columns(2)
         with col1:
-            date_invoiced = st.date_input(f"Date Invoiced", value=date.today(), key=f"date_{i}")
-            worker = st.selectbox(f"Worker Name", worker_names, key=f"worker_{i}")
+            hours = st.number_input("Hours Worked", min_value=0.0, step=0.5, key=f"hours_{i}")
         with col2:
-            hours = st.number_input(f"Hours", min_value=0.0, step=0.5, key=f"hours_{i}")
-        with col3:
-            property = st.selectbox(f"Property", properties, key=f"property_{i}")
-            payable = st.selectbox(f"Payable Party", payable_parties, key=f"payable_{i}")
-
-        description = st.text_area(f"Project Description", key=f"description_{i}")
-
-        rate = hourly_rates.get(worker, 0.0)
-        calculated_amount = hours * rate
-        # Collect the entry
+            property = st.selectbox("Property", [""] + properties, index=0, key=f"property_{i}")
+        payable = worker_to_payable.get(selected_worker, "")
+        st.markdown(f"**Payable Party:** {payable}")
+        description = st.text_area("Description of Work", key=f"description_{i}")
+        amount = round(hours * rate, 2)
         entries.append({
-            "Date Invoiced": date_invoiced.strftime("%Y-%m-%d"),
-            "Worker Name": worker,
+            "Date Invoiced": st.session_state.dates[i].strftime("%m/%d/%Y"),
+            "Worker Name": selected_worker,
             "Hours": hours,
             "Property": property,
-            "Amount": round(calculated_amount, 2),
+            "Amount": amount,
             "Payable Party": payable,
             "Project Description": description
         })
+    review_clicked = st.form_submit_button("Make Changes & Review Summary")
 
-    submitted = st.form_submit_button("Submit All Entries")
+if review_clicked:
+    st.session_state.entries_preview = entries
 
-# --- Handle submission ---
-if submitted:
-    df = pd.DataFrame(entries)
+if "entries_preview" in st.session_state:
+    df_preview = pd.DataFrame(st.session_state.entries_preview)
+    df_preview = df_preview[
+        (df_preview["Worker Name"].str.strip() != "") &
+        (df_preview["Payable Party"].str.strip() != "") &
+        (df_preview["Hours"] > 0)
+    ]
 
-    # Optional: filter out empty/incomplete rows
-    df = df[df["Worker Name"] != ""]  # or add more validation here
-
-    if df.empty:
-        st.error("Please fill out at least one full entry.")
-    else:
-        with st.spinner("Uploading and processing..."):
-
-            def assign_cost_codes(descriptions: list[str]) -> list[str]:
-                prompt = (
-                    "You are given a list of project descriptions. For each one, choose the most appropriate cost code "
-                    "from the mapping below. Respond only with a JSON list where each item is the selected cost code string.\n\n"
-                    "Cost Code Mapping:\n" + cost_code_mapping_text + "\n\n"
-                    "Descriptions:\n" + "\n".join([f"{i+1}. {desc}" for i, desc in enumerate(descriptions)]) +
-                    "\n\nRespond with:\n[\"CODE - Description\", ...]"
-                )
-
-                response = client.chat.completions.create(
-                    model="gpt-4",
-                    messages=[{"role": "user", "content": prompt}]
-                )
-
-                try:
-                    parsed = json.loads(response.choices[0].message.content)
-                except Exception:
-                    st.error("Failed to parse cost codes from OpenAI response.")
-                    parsed = [""] * len(descriptions)
-
-                return parsed
-            
-            descriptions = df["Project Description"].tolist()
-
-            
-            cost_codes = assign_cost_codes(descriptions)
-
-   
-            df["Cost Code"] = cost_codes
-            
-           
-         
+    if not df_preview.empty:
         
-            df['Date Paid'] = None
-            df['Unique ID'] = None
-            df['Item Name'] = None
-            df['Claim Number'] = None
-            df['QB Property'] = None
-            df['Invoice Number'] = None
-            df['Payment Method'] = None
-            df['Status'] = None
-            df['Form'] = "Labor"
-            final_df = df[["Date Paid", "Date Invoiced", "Unique ID", "Claim Number", "Worker Name", "Hours", "Item Name", "Property", "QB Property", "Amount", 'Payable Party', 'Project Description', "Invoice Number", "Cost Code", 'Payment Method', "Status", "Form"]]
+        st.markdown("**📅 All Entries**")
+        st.table(df_preview[["Date Invoiced", "Hours", "Property"]])
 
-            def upload_to_google_sheet(df):
+        st.subheader("📊 Summary")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Total Hours by Worker**")
+            st.table(df_preview.groupby("Worker Name")["Hours"].sum().reset_index())
+        with col2:
+            st.markdown("**Total Hours by Payable Party**")
+            st.table(df_preview.groupby("Payable Party")["Hours"].sum().reset_index())
+
+        if st.button("✅ Confirm & Submit Timesheet"):
+            df = df_preview.copy()
+            invalid = [
+                idx + 1 for idx, row in df.iterrows()
+                if not all([row["Date Invoiced"], row["Property"], row["Payable Party"], row["Project Description"]])
+            ]
+            if invalid:
+                st.error(f"Fill out all fields for entry(s): {', '.join(map(str, invalid))}")
+                st.stop()
+
+            with st.spinner("Processing and uploading..."):
+                def assign_cost_codes(descriptions):
+                    prompt = (
+                        "You are given a list of project descriptions. For each one, choose the most appropriate cost code "
+                        "from the mapping below. Respond only with a JSON list where each item is the selected cost code string.\n\n"
+                        "Cost Code Mapping:\n" + cost_code_mapping_text + "\n\n" +
+                        "Descriptions:\n" + "\n".join([f"{i+1}. {desc}" for i, desc in enumerate(descriptions)]) +
+                        "\n\nRespond with:\n[\"CODE - Description\", ...]"
+                    )
+                    response = client.chat.completions.create(
+                        model="gpt-4",
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    try:
+                        return json.loads(response.choices[0].message.content)
+                    except:
+                        st.error("Error parsing cost codes.")
+                        return [""] * len(descriptions)
+
+                df["Cost Code"] = assign_cost_codes(df["Project Description"].tolist())
+                df['Date Paid'] = None
+                df['Unique ID'] = None
+                df['Item Name'] = None
+                df['Claim Number'] = None
+                df['QB Property'] = None
+                df['Invoice Number'] = None
+                df['Payment Method'] = None
+                df['Status'] = None
+                df['Form'] = "Labor"
+                df['Drive Link'] = None
+                df['Equation Description'] = (
+                    pd.to_datetime(df['Date Invoiced']).dt.strftime("%-m/%y") + " " +
+                    df['Worker Name'] + " " +
+                    df['Project Description']
+                )
+
+                final_df = df[["Date Paid", "Date Invoiced", "Unique ID", "Claim Number", "Worker Name", "Hours", "Item Name",
+                               "Property", "QB Property", "Amount", 'Payable Party', 'Project Description',
+                               "Invoice Number", "Cost Code", 'Payment Method', "Status", "Form", 'Drive Link', 'Equation Description']]
+
+                def upload_to_google_sheet(df):
                     from gspread.utils import rowcol_to_a1
-
                     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-                    creds_dict = st.secrets["gcp_service_account"]
-                    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+                    creds = ServiceAccountCredentials.from_json_keyfile_name(
+                        creds_dict, scope)
                     client = gspread.authorize(creds)
-
-
                     sheet = client.open("BSD MASTER DATA")
                     worksheet = sheet.worksheet("TEST")
-
                     existing = worksheet.get_all_values()
-
-                    # If empty, write headers first
+                    start_row = len(existing) + 1 if existing else 2
                     if not existing:
-                        worksheet.append_row(df.columns.tolist(), value_input_option="USER_ENTERED") 
-                        start_row = 2
-                    else:
-                        start_row = len(existing) + 1
-
-                    # Write all rows in one batch
+                        worksheet.append_row(df.columns.tolist(), value_input_option="USER_ENTERED")
                     data = df.values.tolist()
                     end_row = start_row + len(data) - 1
-                    end_col = len(df.columns)
-                    cell_range = f"A{start_row}:{rowcol_to_a1(end_row, end_col)}"
-
+                    cell_range = f"A{start_row}:{rowcol_to_a1(end_row, len(df.columns))}"
                     worksheet.update(cell_range, data, value_input_option="USER_ENTERED")
 
-            upload_to_google_sheet(final_df)
-
-            st.success("✅ Timesheet entries submitted")
-        
+                upload_to_google_sheet(final_df)
+                st.success("✅ Timesheet entries submitted.")
+    else:
+        st.info("No complete entries to summarize.")
 
 
         # Optional: upload to Google Sheet
