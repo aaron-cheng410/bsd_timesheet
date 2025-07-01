@@ -317,8 +317,7 @@ if "entries_preview" in st.session_state:
                 def upload_to_google_sheet(df):
                     from gspread.utils import rowcol_to_a1
                     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-                    creds = ServiceAccountCredentials.from_json_keyfile_name(
-                        creds_dict, scope)
+                    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
                     client = gspread.authorize(creds)
                     sheet = client.open("BSD MASTER DATA")
                     worksheet = sheet.worksheet("TEST")
