@@ -187,7 +187,7 @@ hourly_rates = {
 }
 
 worker_names = list(hourly_rates.keys())
-properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sanoma', 'Highland', 'Channel View', 'Paseo De las Estrellas']
+properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas']
 
 st.title("Timesheet Submission")
 
@@ -277,12 +277,13 @@ if "entries_preview" in st.session_state:
             with st.spinner("Processing and uploading..."):
                 def assign_cost_codes(descriptions):
                     prompt = (
-                        "You are given a list of project descriptions. For each one, choose the most appropriate cost code "
-                        "from the mapping below. Respond only with a JSON list where each item is the selected cost code string.\n\n"
+                        "You are given a list of project descriptions. For each description, choose exactly **one** most appropriate cost code "
+                        "from the mapping below. Do not explain your choices. Only respond with a JSON list of strings — one cost code per description, "
+                        "in the same order. Do not include multiple codes per item. Do not include extra text.\n\n"
                         "Cost Code Mapping:\n" + cost_code_mapping_text + "\n\n" +
                         "Descriptions:\n" + "\n".join([f"{i+1}. {desc}" for i, desc in enumerate(descriptions)]) +
-                        "\n\nRespond with:\n[\"CODE - Description\", ...]"
-                    )
+                        "\n\nRespond in this format:\n[\"CODE - Description\", ...]"
+                    ) 
                     response = client.chat.completions.create(
                         model="gpt-4",
                         messages=[{"role": "user", "content": prompt}]
@@ -292,8 +293,20 @@ if "entries_preview" in st.session_state:
                     except:
                         st.error("Error parsing cost codes.")
                         return [""] * len(descriptions)
+                
+                codes = assign_cost_codes(df["Project Description"].tolist())
 
-                df["Cost Code"] = assign_cost_codes(df["Project Description"].tolist())
+                if len(codes) > len(df):
+                    codes = codes[:len(df)]
+                elif len(codes) < len(df):
+                    codes += [""] * (len(df) - len(codes))
+
+                df["Cost Code"] = [
+                    c.split(",")[0].strip() if isinstance(c, str)
+                    else c[0].strip() if isinstance(c, list) and c
+                    else ""
+                    for c in codes
+                ]
                 df['Date Paid'] = None
                 df['Unique ID'] = None
                 df['Item Name'] = None
