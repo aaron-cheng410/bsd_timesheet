@@ -19,32 +19,47 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # --- OpenAI Setup ---
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
+def translate_to_english_if_needed(descriptions):
+    system_msg = {
+        "role": "system",
+        "content": "You are a translator. Detect if a sentence is in Spanish and translate it to English. If it's already in English, return it unchanged."
+    }
+    user_msg = {
+        "role": "user",
+        "content": json.dumps(descriptions, ensure_ascii=False)
+    }
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[system_msg, user_msg]
+    )
+    
+    try:
+        return json.loads(response.choices[0].message.content)
+    except:
+        return descriptions
+
 creds_dict = st.secrets["gcp_service_account"]
 
 worker_to_payable = {
-    "Christian": "Christian Granados (Vendor)",
-    "Oscar": "Christian Granados (Vendor)",
-    "Edgar": "Christian Granados (Vendor)",
-    "Eddy": "Christian Granados (Vendor)",
-    "Juan Carlos": "Christian Granados (Vendor)",
-    "Jose Drywall": "Christian Granados (Vendor)",
-    "Tavo": "Christian Granados (Vendor)",
-    "Juan Chocoj": "Christian Granados (Vendor)",
-    "Tony": "Christian Granados (Vendor)",
-    "Ozzy": "Jessica Ajtun",
-    "Jose": "Jessica Ajtun",
-    "Luis De Leon": "Jessica Ajtun",
-    "Mymor": "Jessica Ajtun",
-    "Leon": "Jessica Ajtun",
-    "Fernando": "Jessica Ajtun",
-    "Junior": "Jessica Ajtun",
-    "Leonidas": "Jessica Ajtun",
-    "Estvardo": "Jessica Ajtun",
-    "Nelson": "Jessica Ajtun",
-    "Erick": "Jessica Ajtun",
-    "Andres De Jesus": "Andres De Jesus",
-    "Victor": "Andres De Jesus",
-    "Enrique": "Andres De Jesus"
+    "Christian Granados (Christian)": "Christian Granados (Vendor)",
+    "Eddy (Christian)": "Christian Granados (Vendor)",
+    "Juan Carlos Aguilar (Christian)": "Christian Granados (Vendor)",
+    "Jose (Christian)": "Christian Granados (Vendor)",
+    "Osvaldo Ramirez (Ozzy)": "Jessica Ajtun",
+    "Jose Zalasar (Ozzy)": "Jessica Ajtun",
+    "Luis De Leon (Ozzy)": "Jessica Ajtun",
+    "Rufino Gonzales (Ozzy)": "Jessica Ajtun",
+    "Mymor Areola (Ozzy)": "Jessica Ajtun",
+    "Fernando Vasqes (Ozzy)": "Jessica Ajtun",
+    "Junior Ramierez (Ozzy)": "Jessica Ajtun",
+    "Leonidas Yoc (Ozzy)": "Jessica Ajtun",
+    "Estvardo Serrano (Ozzy)": "Jessica Ajtun",
+    "Nelson Vasqes (Ozzy)": "Jessica Ajtun",
+    "Erick Mendez (Ozzy)": "Jessica Ajtun",
+    "Andres De Jesus (Andres)": "Andres De Jesus",
+    "Victor (Andres)": "Andres De Jesus",
+    "Enrique (Andres)": "Andres De Jesus"
 }
 
 cost_code_mapping_text = """00030 - Financing Fees
@@ -161,33 +176,28 @@ elif len(st.session_state.dates) > st.session_state.num_rows:
     st.session_state.dates = st.session_state.dates[:st.session_state.num_rows]
 
 hourly_rates = {
-    "Christian": 43.75,
-    "Andres De Jesus": 37.50,
-    "Enrique": 25.00,
-    "Oscar": 31.25,
-    "Edgar": 31.25,
-    "Eddy": 34.38,
-    "Juan Carlos": 34.38,
-    "Jose Drywall": 25.00,
-    "Tavo": 31.25,
-    "Juan Chocoj": 37.50,
-    "Victor": 31.25,
-    "Tony": 31.25,
-    "Ozzy": 37.50,
-    "Jose": 31.25,
-    "Luis De Leon": 31.25,
-    "Mymor": 25.00,
-    "Leon": 25.00,
-    "Fernando": 25.00,
-    "Junior": 25.00,
-    "Leonidas": 25.00,
-    "Estvardo": 25.00,
-    "Nelson": 25.00,
-    "Erick": 25.00,
+    "Christian Granados (Christian)": 43.75,
+    "Andres De Jesus (Andres)": 37.50,
+    "Eddy (Christian)": 34.38,
+    "Juan Carlos Aguilar (Christian)": 34.38,
+    "Jose (Christian)": 25.00,
+    "Victor (Andres)": 25.00,
+    "Enrique (Andres)": 25.00,
+    "Osvaldo Ramirez (Ozzy)": 37.50,
+    "Jose Zalasar (Ozzy)": 31.25,
+    "Luis De Leon (Ozzy)": 31.25,
+    "Rufino Gonzales (Ozzy)": 31.25,
+    "Mymor Areola (Ozzy)": 25.00,
+    "Fernando Vasqes (Ozzy)": 25.00,
+    "Junior Ramierez (Ozzy)": 25.00,
+    "Leonidas Yoc (Ozzy)": 25.00,
+    "Estvardo Serrano (Ozzy)": 25.00,
+    "Nelson Vasqes (Ozzy)": 25.00,
+    "Erick Mendez (Ozzy)": 25.00,
 }
 
 worker_names = list(hourly_rates.keys())
-properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas']
+properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas', 'Marguerite']
 
 st.title("Timesheet Submission")
 
@@ -277,7 +287,7 @@ if "entries_preview" in st.session_state:
             with st.spinner("Processing and uploading..."):
                 def assign_cost_codes(descriptions):
                     prompt = (
-                        "You are given a list of project descriptions. For each description, choose exactly **one** most appropriate cost code "
+                        "You are given a list of project descriptions. Some may be in Spanish. Translate each to English if necessary. For each description, choose exactly **one** most appropriate cost code "
                         "from the mapping below. Do not explain your choices. Only respond with a JSON list of strings — one cost code per description, "
                         "in the same order. Do not include multiple codes per item. Do not include extra text.\n\n"
                         "Cost Code Mapping:\n" + cost_code_mapping_text + "\n\n" +
@@ -293,14 +303,14 @@ if "entries_preview" in st.session_state:
                     except:
                         st.error("Error parsing cost codes.")
                         return [""] * len(descriptions)
-                
+                df["Project Description"] = translate_to_english_if_needed(df["Project Description"].tolist())
                 codes = assign_cost_codes(df["Project Description"].tolist())
 
                 if len(codes) > len(df):
                     codes = codes[:len(df)]
                 elif len(codes) < len(df):
                     codes += [""] * (len(df) - len(codes))
-
+                
                 df["Cost Code"] = [
                     c.split(",")[0].strip() if isinstance(c, str)
                     else c[0].strip() if isinstance(c, list) and c
@@ -315,7 +325,7 @@ if "entries_preview" in st.session_state:
                 df['Invoice Number'] = None
                 df['Payment Method'] = None
                 df['Status'] = None
-                df['Form'] = "Labor"
+                df['Form'] = "LABOR"
                 df['Drive Link'] = None
                 df['Equation Description'] = (
                     pd.to_datetime(df['Date Invoiced']).dt.strftime("%-m/%y") + " " +
