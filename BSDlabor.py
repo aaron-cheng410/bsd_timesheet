@@ -197,7 +197,7 @@ hourly_rates = {
 }
 
 worker_names = list(hourly_rates.keys())
-properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas', 'Marguerite']
+properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas', 'Marguerite', 'BSD SHOP']
 
 st.title("Timesheet Submission")
 
@@ -328,7 +328,7 @@ if "entries_preview" in st.session_state:
                 df['Form'] = "LABOR"
                 df['Drive Link'] = None
                 df['Equation Description'] = (
-                    pd.to_datetime(df['Date Invoiced']).dt.strftime("%-m/%y") + " " +
+                    pd.to_datetime(df['Date Invoiced']).dt.strftime("%m/%d/%Y") + " " +
                     df['Worker Name'] + " " +
                     df['Project Description']
                 )
