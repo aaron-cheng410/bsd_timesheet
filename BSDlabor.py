@@ -59,7 +59,8 @@ worker_to_payable = {
     "Erick Mendez (Ozzy)": "Jessica Ajtun",
     "Andres De Jesus (Andres)": "Andres De Jesus",
     "Victor (Andres)": "Andres De Jesus",
-    "Enrique (Andres)": "Andres De Jesus"
+    "Enrique (Andres)": "Andres De Jesus",
+    "Kike (Andres)": "Andres De Jesus"
 }
 
 cost_code_mapping_text = """00030 - Financing Fees
@@ -194,6 +195,7 @@ hourly_rates = {
     "Estvardo Serrano (Ozzy)": 25.00,
     "Nelson Vasqes (Ozzy)": 25.00,
     "Erick Mendez (Ozzy)": 25.00,
+    "Kike (Andres)": 25.00,
 }
 
 worker_names = list(hourly_rates.keys())
