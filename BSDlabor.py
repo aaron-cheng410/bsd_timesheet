@@ -235,7 +235,11 @@ with st.form("multi_timesheet_form"):
         with col1:
             hours = st.number_input("Hours Worked", min_value=0.0, step=0.5, key=f"hours_{i}")
         with col2:
-            property = st.selectbox("Property", [""] + properties, index=0, key=f"property_{i}")
+            property_choice = st.selectbox("Select Property", [""] + properties, index=0, key=f"property_{i}")
+            
+        manual_property = st.text_input("Or Enter Property", key=f"manual_property_{i}").strip()
+        effective_property = manual_property if manual_property else property_choice
+        
         payable = worker_to_payable.get(selected_worker, "")
         st.markdown(f"**Payable Party:** {payable}")
         description = st.text_area("Description of Work", key=f"description_{i}")
@@ -244,7 +248,7 @@ with st.form("multi_timesheet_form"):
             "Date Invoiced": st.session_state.dates[i].strftime("%m/%d/%Y"),
             "Worker Name": selected_worker,
             "Hours": hours,
-            "Property": property,
+            "Property": effective_property,
             "Amount": amount,
             "Payable Party": payable,
             "Project Description": description
@@ -344,8 +348,8 @@ if "entries_preview" in st.session_state:
                     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
                     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
                     client = gspread.authorize(creds)
-                    sheet = client.open("BSD MASTER DATA")
-                    worksheet = sheet.worksheet("TEST")
+                    sheet = client.open("BSD Master Data Submittals")
+                    worksheet = sheet.worksheet("Master Data")
                     existing = worksheet.get_all_values()
                     start_row = len(existing) + 1 if existing else 2
                     if not existing:
