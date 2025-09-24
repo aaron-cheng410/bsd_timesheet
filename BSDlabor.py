@@ -209,11 +209,32 @@ if st.button("Reset Timesheet"):
         del st.session_state[key]
     st.rerun()
 
-selected_worker = st.selectbox("Select Worker", [""] + worker_names, key="worker_select")
-if not selected_worker:
+colw1, colw2 = st.columns([2, 2])
+with colw1:
+    selected_worker = st.selectbox("Select Worker", [""] + worker_names, index=0, key="selected_worker")
+with colw2:
+    manual_worker = st.text_input("or enter worker manually", key="manual_worker").strip()
+
+is_manual_worker = manual_worker != ""
+effective_worker = manual_worker if is_manual_worker else selected_worker
+
+if not effective_worker:
     st.stop()
 
-rate = hourly_rates.get(selected_worker, 0.0)
+# Hourly rate: manual worker is always $25
+rate = 25.00 if is_manual_worker else hourly_rates.get(effective_worker, 0.0)
+
+# Payable party UI:
+if is_manual_worker:
+    payable = st.selectbox(
+        "Payable Party (required for manual worker)",
+        [""] + payable_parties,
+        index=0,
+        key="manual_payable"
+    )
+else:
+    payable = worker_to_payable.get(effective_worker, "")
+    st.markdown(f"**Payable Party:** {payable}")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -240,22 +261,26 @@ with st.form("multi_timesheet_form"):
         manual_property = st.text_input("Or Enter Property", key=f"manual_property_{i}").strip()
         effective_property = manual_property if manual_property else property_choice
         
-        payable = worker_to_payable.get(selected_worker, "")
-        st.markdown(f"**Payable Party:** {payable}")
+
         description = st.text_area("Description of Work", key=f"description_{i}")
         amount = round(hours * rate, 2)
+
         entries.append({
             "Date Invoiced": st.session_state.dates[i].strftime("%m/%d/%Y"),
-            "Worker Name": selected_worker,
+            "Worker Name": effective_worker,         # <-- use effective_worker
             "Hours": hours,
             "Property": effective_property,
             "Amount": amount,
-            "Payable Party": payable,
+            "Payable Party": payable,                 # <-- use payable (from manual select or mapping)
             "Project Description": description
         })
+
     review_clicked = st.form_submit_button("Make Changes & Review Summary")
 
 if review_clicked:
+    if is_manual_worker and not payable.strip():
+        st.error("Please select a Payable Party for the manually entered worker.")
+        st.stop()
     st.session_state.entries_preview = entries
 
 if "entries_preview" in st.session_state:
