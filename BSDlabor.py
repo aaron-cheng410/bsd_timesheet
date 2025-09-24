@@ -200,6 +200,7 @@ hourly_rates = {
 
 worker_names = list(hourly_rates.keys())
 properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas', 'Marguerite', 'BSD SHOP']
+payable_parties = ["Christian Granados (Vendor)", "Jessica Ajtun", "Andres De Jesus"]
 
 st.title("Timesheet Submission")
 
