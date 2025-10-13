@@ -46,6 +46,7 @@ worker_to_payable = {
     "Eddy (Christian)": "Christian Granados (Vendor)",
     "Juan Carlos Aguilar (Christian)": "Christian Granados (Vendor)",
     "Jose (Christian)": "Christian Granados (Vendor)",
+    "Manolo (Christian)": "Christian Granados (Vendor)",
     "Osvaldo Ramirez (Ozzy)": "Jessica Ajtun",
     "Jose Zalasar (Ozzy)": "Jessica Ajtun",
     "Luis De Leon (Ozzy)": "Jessica Ajtun",
@@ -196,6 +197,9 @@ hourly_rates = {
     "Nelson Vasqes (Ozzy)": 25.00,
     "Erick Mendez (Ozzy)": 25.00,
     "Kike (Andres)": 25.00,
+    "Manolo (Christian)": 31.25,
+    "Chuy Cano (Hourly)": 37.50,
+    "Pedro (Hourly)": 31.25
 }
 
 worker_names = list(hourly_rates.keys())
@@ -234,7 +238,10 @@ if is_manual_worker:
         key="manual_payable"
     )
 else:
-    payable = worker_to_payable.get(effective_worker, "")
+    try:
+        payable = worker_to_payable.get(effective_worker, "")
+    except:
+        payable = None
     st.markdown(f"**Payable Party:** {payable}")
 
 col1, col2 = st.columns(2)
