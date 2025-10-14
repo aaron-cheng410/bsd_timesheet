@@ -47,6 +47,8 @@ worker_to_payable = {
     "Juan Carlos Aguilar (Christian)": "Christian Granados (Vendor)",
     "Jose (Christian)": "Christian Granados (Vendor)",
     "Manolo (Christian)": "Christian Granados (Vendor)",
+    "Chuy Cano (Christian)": "Christian Granados (Vendor)",
+    "Pedro (Christian)": "Christian Granados (Vendor)",
     "Osvaldo Ramirez (Ozzy)": "Jessica Ajtun",
     "Jose Zalasar (Ozzy)": "Jessica Ajtun",
     "Luis De Leon (Ozzy)": "Jessica Ajtun",
@@ -198,8 +200,8 @@ hourly_rates = {
     "Erick Mendez (Ozzy)": 25.00,
     "Kike (Andres)": 25.00,
     "Manolo (Christian)": 31.25,
-    "Chuy Cano (Hourly)": 37.50,
-    "Pedro (Hourly)": 31.25
+    "Chuy Cano (Christian)": 37.50,
+    "Pedro (Christian)": 31.25
 }
 
 worker_names = list(hourly_rates.keys())
