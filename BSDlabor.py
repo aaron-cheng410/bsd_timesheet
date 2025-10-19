@@ -49,6 +49,7 @@ worker_to_payable = {
     "Manolo (Christian)": "Christian Granados (Vendor)",
     "Chuy Cano (Christian)": "Christian Granados (Vendor)",
     "Pedro (Christian)": "Christian Granados (Vendor)",
+    "Luis (Christian)": "Christian Granados (Vendor)",
     "Osvaldo Ramirez (Ozzy)": "Jessica Ajtun",
     "Jose Zalasar (Ozzy)": "Jessica Ajtun",
     "Luis De Leon (Ozzy)": "Jessica Ajtun",
@@ -185,6 +186,7 @@ hourly_rates = {
     "Eddy (Christian)": 34.38,
     "Juan Carlos Aguilar (Christian)": 34.38,
     "Jose (Christian)": 25.00,
+    "Luis (Christian)": 31.25
     "Victor (Andres)": 25.00,
     "Enrique (Andres)": 25.00,
     "Osvaldo Ramirez (Ozzy)": 37.50,
