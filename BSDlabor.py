@@ -186,7 +186,7 @@ hourly_rates = {
     "Eddy (Christian)": 34.38,
     "Juan Carlos Aguilar (Christian)": 34.38,
     "Jose (Christian)": 25.00,
-    "Luis (Christian)": 31.25
+    "Luis (Christian)": 31.25,
     "Victor (Andres)": 25.00,
     "Enrique (Andres)": 25.00,
     "Osvaldo Ramirez (Ozzy)": 37.50,
