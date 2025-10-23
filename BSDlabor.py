@@ -282,7 +282,7 @@ with st.form("multi_timesheet_form"):
             "Worker Name": effective_worker,         # <-- use effective_worker
             "Hours": hours,
             "Property": effective_property,
-            "Amount": amount,
+            "Amount": round(amount, 2),
             "Payable Party": payable,                 # <-- use payable (from manual select or mapping)
             "Project Description": description
         })
