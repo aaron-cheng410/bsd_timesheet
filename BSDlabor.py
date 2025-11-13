@@ -64,7 +64,9 @@ worker_to_payable = {
     "Andres De Jesus (Andres)": "Andres De Jesus",
     "Victor (Andres)": "Andres De Jesus",
     "Enrique (Andres)": "Andres De Jesus",
-    "Kike (Andres)": "Andres De Jesus"
+    "Kike (Andres)": "Andres De Jesus",
+    "Carlos Cantoral (Jessica Ajtun)": "Jessica Ajtun",
+    "Douglas Barillas (Christian)": "Christian Granados (Vendor)"
 }
 
 cost_code_mapping_text = """00030 - Financing Fees
@@ -203,7 +205,9 @@ hourly_rates = {
     "Kike (Andres)": 25.00,
     "Manolo (Christian)": 31.25,
     "Chuy Cano (Christian)": 37.50,
-    "Pedro (Christian)": 31.25
+    "Pedro (Christian)": 31.25,
+    "Douglas Barillas (Christian)": 37.50,
+    "Carlos Cantoral (Jessica Ajtun)": 25.00,
 }
 
 worker_names = list(hourly_rates.keys())
