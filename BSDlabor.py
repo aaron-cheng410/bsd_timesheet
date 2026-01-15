@@ -69,7 +69,8 @@ worker_to_payable = {
     "Douglas Barillas (Christian)": "Christian Granados (Vendor)",
     "Erick Granados (Christian)": "Christian Granados (Vendor)",
     "Joaquin Santizo (Christian)": "Christian Granados (Vendor)",
-    "Fabian (Andres)": "Andres De Jesus"
+    "Fabian (Andres)": "Andres De Jesus",
+    "Sergio (Andres)": "Andres De Jesus"
 }
 
 cost_code_mapping_text = """00030 - Financing Fees
@@ -80,7 +81,7 @@ cost_code_mapping_text = """00030 - Financing Fees
 01028 - Safety Audit
 01100 - Surveying
 01200 - Hydro/Gas/Telus Services
-01210 - Temp Hydro
+01210 - Temp Power
 01220 - Temporary Heat
 01230 - Temporary Lighting & Security Lighting
 01240 - Temporary Water
@@ -165,6 +166,7 @@ cost_code_mapping_text = """00030 - Financing Fees
 16050 - General Electrical
 16100 - Solar System
 16800 - Low Voltage (Security, Internet)
+08221 - Door Installation
 16900 - Sound and Audio"""
 
 if "num_rows" not in st.session_state:
@@ -213,12 +215,14 @@ hourly_rates = {
     "Carlos Cantoral (Jessica Ajtun)": 25.00,
     "Erick Granados (Christian)": 31.25,
     "Joaquin Santizo (Christian)": 34.38,
-    "Fabian (Andres)": 25.00
+    "Fabian (Andres)": 25.00,
+    "Sergio (Andres)": 25.00
+    
     
 }
 
 worker_names = list(hourly_rates.keys())
-properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas', 'Marguerite', 'BSD SHOP', '5 Montepellier']
+properties = ["Coto", "Milford", "647 Navy", "645 Navy", 'Sagebrush', 'Paramount', '126 Scenic', 'San Marino', 'King Arthur', 'Via Sonoma', 'Highland', 'Channel View', 'Paseo De las Estrellas', 'Marguerite', 'BSD SHOP', '5 Montepellier', 'Sycamore']
 payable_parties = ["Christian Granados (Vendor)", "Jessica Ajtun", "Andres De Jesus"]
 
 st.title("Timesheet Submission")
