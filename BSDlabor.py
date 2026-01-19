@@ -70,7 +70,9 @@ worker_to_payable = {
     "Erick Granados (Christian)": "Christian Granados (Vendor)",
     "Joaquin Santizo (Christian)": "Christian Granados (Vendor)",
     "Fabian (Andres)": "Andres De Jesus",
-    "Sergio (Andres)": "Andres De Jesus"
+    "Sergio (Andres)": "Andres De Jesus",
+    "Alejandro Rodriguez (Christian)": "Christian Granados (Vendor)",
+    "Miguel Rodriguez (Christian)": "Christian Granados (Vendor)"
 }
 
 cost_code_mapping_text = """00030 - Financing Fees
@@ -216,7 +218,9 @@ hourly_rates = {
     "Erick Granados (Christian)": 31.25,
     "Joaquin Santizo (Christian)": 34.38,
     "Fabian (Andres)": 25.00,
-    "Sergio (Andres)": 25.00
+    "Sergio (Andres)": 25.00,
+    "Alejandro Rodriguez (Christian)": 34.38,
+    "Miguel Rodriguez (Christian)": 37.50
     
     
 }
